@@ -1,0 +1,26 @@
+//Store - Remove all Social Accounts except Instagram, Facebook & Twitter
+
+
+add_filter('wcfm_profile_fields_social', function($social_accounts) {
+
+$social_accounts = array_intersect_key( $social_accounts, array_flip( [ 'instagram' ,'facebook', 'twitter' ] ) );
+
+return $social_accounts;
+
+});
+
+add_filter( 'wcfm_profile_fields_social',function($fields, $vendor_id){
+
+$fields['twitter']['label'] = __('Twitter URL', 'wc-frontend-manager');
+
+$fields['facebook']['label'] = __('Facebook URL', 'wc-frontend-manager');
+
+$fields['instagram']['label'] = __('Instagram URL', 'wc-frontend-manager');
+
+
+
+return $fields;
+
+},10,2);
+
+add_filter( 'wcfm_is_allow_setup_social_profile', '__return_false' );
