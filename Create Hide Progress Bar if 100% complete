@@ -1,0 +1,182 @@
+//Store Dashboard - Hide Progress Bar if 100% complete
+
+add_filter('wcfm_is_allow_profile_complete_bar', function($do_show) {
+global $WCFMmp;
+if(wcfm_is_vendor()) {
+$user_id = apply_filters( 'wcfm_current_vendor_id', get_current_user_id() );
+$vendor_data = get_user_meta( $user_id, 'wcfmmp_profile_settings', true );
+
+$profile_complete_components = apply_filters( 'profile_complete_components', array(
+'banner' => 'banner',
+'gravatar' => 'gravatar',
+'store_name' => 'store_name',
+'phone' => 'phone',
+'about' => 'about',
+'address' => 'address',
+'location' => 'location',
+'payment' => 'payment',
+'policy' => 'policy',
+'support' => 'support',
+'seo' => 'seo',
+'shipping' => 'shipping'
+) );
+if( !apply_filters( 'wcfm_is_allow_store_logo', true ) ) {
+unset( $profile_complete_components['gravatar'] );
+}
+
+if( !apply_filters( 'wcfm_is_allow_store_name', true ) ) {
+unset( $profile_complete_components['store_name'] );
+}
+
+if( !apply_filters( 'wcfm_is_allow_store_banner', true ) ) {
+unset( $profile_complete_components['banner'] );
+}
+
+if( !apply_filters( 'wcfm_is_allow_store_phone', true ) ) {
+unset( $profile_complete_components['phone'] );
+}
+
+if( !apply_filters( 'wcfm_is_allow_store_description', true ) ) {
+unset( $profile_complete_components['about'] );
+}
+
+if( !apply_filters( 'wcfm_is_allow_store_address', true ) ) {
+unset( $profile_complete_components['address'] );
+}
+
+$api_key = isset( $WCFMmp->wcfmmp_marketplace_options['wcfm_google_map_api'] ) ? $WCFMmp->wcfmmp_marketplace_options['wcfm_google_map_api'] : '';
+$wcfm_map_lib = isset( $WCFMmp->wcfmmp_marketplace_options['wcfm_map_lib'] ) ? $WCFMmp->wcfmmp_marketplace_options['wcfm_map_lib'] : '';
+if( !$wcfm_map_lib && $api_key ) { $wcfm_map_lib = 'google'; } elseif( !$wcfm_map_lib && !$api_key ) { $wcfm_map_lib = 'leaftlet'; }
+if ( ( ($wcfm_map_lib == 'google') && empty( $api_key ) ) || !apply_filters( 'wcfm_is_allow_store_address', true ) || !apply_filters( 'wcfm_is_allow_store_map_location', true ) ) {
+unset( $profile_complete_components['location'] );
+}
+
+if( !apply_filters( 'wcfm_is_pref_withdrawal', true ) || !apply_filters( 'wcfm_is_allow_billing_settings', true ) ) {
+unset( $profile_complete_components['payment'] );
+}
+
+if( !apply_filters( 'wcfm_is_pref_policies', true ) || !apply_filters( 'wcfm_is_allow_policy_settings', true ) ) {
+unset( $profile_complete_components['policy'] );
+}
+
+if( !apply_filters( 'wcfm_is_allow_customer_support_settings', true ) || !apply_filters( 'wcfm_is_allow_customer_support', true ) ) {
+unset( $profile_complete_components['support'] );
+}
+
+if( !apply_filters( 'wcfm_is_allow_vseo_settings', true ) ) {
+unset( $profile_complete_components['seo'] );
+}
+
+if( !apply_filters( 'wcfm_is_allow_shipping', true ) || !apply_filters( 'wcfm_is_allow_vshipping_settings', true ) ) {
+unset( $profile_complete_components['shipping'] );
+}
+
+$component_percent = 100/count($profile_complete_components);
+
+// Store Genral
+$gravatar = isset( $vendor_data['gravatar'] ) ? absint( $vendor_data['gravatar'] ) : 0;
+$banner = isset( $vendor_data['banner'] ) ? absint( $vendor_data['banner'] ) : 0;
+$store_name = isset( $vendor_data['store_name'] ) ? esc_attr( $vendor_data['store_name'] ) : '';
+$phone = ( isset( $vendor_data['phone'] ) && !is_array( $vendor_data['phone'] ) ) ? esc_attr( $vendor_data['phone'] ) : '';
+
+// Store Description
+$shop_description = wcfm_get_user_meta( $user_id, '_store_description', true );
+
+// Address
+$street_1 = isset( $vendor_data['address']['street_1'] ) ? $vendor_data['address']['street_1'] : '';
+$country = isset( $vendor_data['address']['country'] ) ? $vendor_data['address']['country'] : '';
+
+// Location
+$store_location = isset( $vendor_data['store_location'] ) ? esc_attr( $vendor_data['store_location'] ) : '';
+
+// Payment
+$payment_mode = isset( $vendor_data['payment']['method'] ) ? esc_attr( $vendor_data['payment']['method'] ) : '' ;
+$paypal = isset( $vendor_data['payment']['paypal']['email'] ) ? esc_attr( $vendor_data['payment']['paypal']['email'] ) : '' ;
+$skrill = isset( $vendor_data['payment']['skrill']['email'] ) ? esc_attr( $vendor_data['payment']['skrill']['email'] ) : '' ;
+$ac_number = isset( $vendor_data['payment']['bank']['ac_number'] ) ? esc_attr( $vendor_data['payment']['bank']['ac_number'] ) : '';
+
+// Policy
+$wcfm_policy_vendor_options = (array) get_user_meta( $user_id, 'wcfm_policy_vendor_options', true );
+$_wcfm_vendor_policy_tab_title = isset( $wcfm_policy_vendor_options['policy_tab_title'] ) ? $wcfm_policy_vendor_options['policy_tab_title'] : '';
+$_wcfm_vendor_shipping_policy = isset( $wcfm_policy_vendor_options['shipping_policy'] ) ? $wcfm_policy_vendor_options['shipping_policy'] : '';
+$_wcfm_vendor_refund_policy = isset( $wcfm_policy_vendor_options['refund_policy'] ) ? $wcfm_policy_vendor_options['refund_policy'] : '';
+$_wcfm_vendor_cancellation_policy = isset( $wcfm_policy_vendor_options['cancellation_policy'] ) ? $wcfm_policy_vendor_options['cancellation_policy'] : '';
+
+// SEO
+$wcfmmp_seo_meta_title = isset( $vendor_data['store_seo']['wcfmmp-seo-meta-title'] ) ? $vendor_data['store_seo']['wcfmmp-seo-meta-title'] : '';
+$wcfmmp_seo_meta_desc = isset( $vendor_data['store_seo']['wcfmmp-seo-meta-desc'] ) ? $vendor_data['store_seo']['wcfmmp-seo-meta-desc'] : '';
+$wcfmmp_seo_meta_keywords = isset( $vendor_data['store_seo']['wcfmmp-seo-meta-keywords'] ) ? $vendor_data['store_seo']['wcfmmp-seo-meta-keywords'] : '';
+
+// Customer Support
+$vendor_customer_phone = isset( $vendor_data['customer_support']['phone'] ) ? $vendor_data['customer_support']['phone'] : '';
+$vendor_customer_email = isset( $vendor_data['customer_support']['email'] ) ? $vendor_data['customer_support']['email'] : '';
+$vendor_csd_return_address1 = isset( $vendor_data['customer_support']['address1'] ) ? $vendor_data['customer_support']['address1'] : '';
+$vendor_csd_return_country = isset( $vendor_data['customer_support']['country'] ) ? $vendor_data['customer_support']['country'] : '';
+
+$profile_complete_percent = 0;
+$profile_remaining_items = array();
+
+if( apply_filters( 'wcfm_is_allow_store_logo', true ) && $gravatar ) {
+$profile_complete_percent += $component_percent;
+}
+
+if( apply_filters( 'wcfm_is_allow_store_name', true ) && $store_name) {
+$profile_complete_percent += $component_percent;
+}
+
+if( apply_filters( 'wcfm_is_allow_store_banner', true ) && $banner ) {
+$profile_complete_percent += $component_percent;
+}
+
+if( apply_filters( 'wcfm_is_allow_store_phone', true ) && $phone ) {
+$profile_complete_percent += $component_percent;
+}
+
+if( apply_filters( 'wcfm_is_allow_store_description', true ) && $shop_description ) {
+$profile_complete_percent += $component_percent;
+}
+
+if( apply_filters( 'wcfm_is_allow_store_address', true ) && $street_1 && $country ) {
+$profile_complete_percent += $component_percent;
+
+if( apply_filters( 'wcfm_is_allow_store_map_location', true ) ) {
+$api_key = isset( $WCFMmp->wcfmmp_marketplace_options['wcfm_google_map_api'] ) ? $WCFMmp->wcfmmp_marketplace_options['wcfm_google_map_api'] : '';
+$wcfm_map_lib = isset( $WCFMmp->wcfmmp_marketplace_options['wcfm_map_lib'] ) ? $WCFMmp->wcfmmp_marketplace_options['wcfm_map_lib'] : '';
+if( !$wcfm_map_lib && $api_key ) { $wcfm_map_lib = 'google'; } elseif( !$wcfm_map_lib && !$api_key ) { $wcfm_map_lib = 'leaftlet'; }
+if ( ( ( ($wcfm_map_lib == 'google') && !empty( $api_key ) ) || ($wcfm_map_lib == 'leaflet') ) && $store_location ) {
+$profile_complete_percent += $component_percent;
+}
+}
+}
+
+if( apply_filters( 'wcfm_is_pref_withdrawal', true ) && apply_filters( 'wcfm_is_allow_billing_settings', true ) ) {
+if( $payment_mode && ( $paypal || $skrill || $ac_number || ( $payment_mode == 'stripe' ) || ( $payment_mode == 'by_cash' ) ) ) {
+$profile_complete_percent += $component_percent;
+}
+}
+
+if( apply_filters( 'wcfm_is_pref_policies', true ) && apply_filters( 'wcfm_is_allow_policy_settings', true ) ) {
+if( $_wcfm_vendor_policy_tab_title && $_wcfm_vendor_shipping_policy && $_wcfm_vendor_refund_policy && $_wcfm_vendor_cancellation_policy ) {
+$profile_complete_percent += $component_percent;
+}
+}
+
+if( apply_filters( 'wcfm_is_allow_customer_support_settings', true ) && apply_filters( 'wcfm_is_allow_customer_support', true ) ) {
+if( $vendor_customer_phone && $vendor_customer_email && $vendor_csd_return_address1 && $vendor_csd_return_country ) {
+$profile_complete_percent += $component_percent;
+}
+}
+
+if( apply_filters( 'wcfm_is_allow_vseo_settings', true ) ) {
+if( $wcfmmp_seo_meta_title && $wcfmmp_seo_meta_desc && $wcfmmp_seo_meta_keywords ) {
+$profile_complete_percent += $component_percent;
+}
+}
+
+if( apply_filters( 'wcfm_is_allow_shipping', true ) && apply_filters( 'wcfm_is_allow_vshipping_settings', true ) ) {
+$profile_complete_percent += $component_percent;
+}
+return ! (round($profile_complete_percent, 0)==100);
+}
+return $do_show;
+});
