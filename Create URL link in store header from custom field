@@ -1,3 +1,5 @@
+//Store Dashboard - Hide Progress Bar if 100% complete
+
 add_action('after_wcfmmp_store_header_info','additonal_info_after_wcfmmp_store_header_info'); function additonal_info_after_wcfmmp_store_header_info($vendor_id) { global $WCFM, $WCFMmp, $wpdb; $wcfmmp_addition_info_fields = wcfm_get_option( 'wcfmvm_registration_custom_fields', array() ); if( empty( $wcfmmp_addition_info_fields ) ) return; $has_addition_field = false; if( !empty( $wcfmmp_addition_info_fields ) ) 
 { foreach( $wcfmmp_addition_info_fields as $wcfmvm_registration_custom_field ) { if( !isset( $wcfmvm_registration_custom_field['enable'] ) ) continue; if( !$wcfmvm_registration_custom_field['label'] ) continue; $has_addition_field = true; break; } }
 if( !$has_addition_field ) return; $wcfmvm_custom_infos = (array) get_user_meta( $vendor_id, 'wcfmvm_custom_infos', true ); if( !empty( $wcfmmp_addition_info_fields ) ) 
