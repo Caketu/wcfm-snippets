@@ -1,0 +1,10 @@
+//Change store shipping settings to miles from km
+
+add_filter( 'wcfmmp_settings_fields_shipping_rates_by_distance', function( $fields ) {
+	global $WCFMmp;
+	if( isset( $fields['wcfmmp_shipping_by_distance_rates'] ) ) {
+		$radius_unit   = isset( $WCFMmp->wcfmmp_marketplace_options['radius_unit'] ) ? $WCFMmp->wcfmmp_marketplace_options['radius_unit'] : 'km';
+		$fields['wcfmmp_shipping_by_distance_rates']['options']['wcfmmp_distance_unit']['label'] = __('Distance', 'wc-multivendor-marketplace') . ' ('.$radius_unit.')';
+	}
+	return $fields;
+} );
